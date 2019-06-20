@@ -1,6 +1,7 @@
 const Router = require('koa-router');
 const router = new Router();
 const bcrypt = require('bcryptjs');   // 对用户输入的密码进行加密
+const gravatar = require('gravatar');
 
 // 引入User
 const User = require('../../model/Users');
@@ -30,9 +31,15 @@ router.post('/register', async ctx => {
     ctx.status = 500;
     ctx.body = { email: ' 当前邮箱已被注册' };
   } else {
+    /**
+     * gravatar——全球公认图像
+     * 如果已经在http://cn.gravatar.com注册并上传了自己的图像，则会自动获取你的图像，否则展示默认图像
+     */
+    const avatar = gravatar.url(_body.email, { s: '200', r: 'pg', d: 'mm' });
     const newUser = new User({
       name: _body.name,
       email: _body.email,
+      avatar:avatar,
       password: _body.password
     });
     // console.log(newUser);
@@ -41,7 +48,7 @@ router.post('/register', async ctx => {
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(newUser.password, salt, (err, hash) => {
         // console.log(hash);
-        if(err) throw err;
+        if (err) throw err;
         newUser.password = hash;
       });
     });
