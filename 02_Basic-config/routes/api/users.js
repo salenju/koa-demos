@@ -1,6 +1,7 @@
 const Router = require('koa-router');
 const router = new Router();
 const gravatar = require('gravatar');
+const bcrypt = require('bcryptjs');
 
 const tools = require('../../config/tools');
 const User = require('../../model/Users');  // 引入User
@@ -54,6 +55,30 @@ router.post('/register', async ctx => {
 
     // 返回json数据
     ctx.body = newUser;
+  }
+});
+
+/**
+ * @route POST api/users/register
+ * @desc  登录接口地址，返回token
+ * @access 接口是公开的
+ */
+router.post('/login',async ctx => {
+  const _body = ctx.request.body;
+  // 查询当前登录用户是否已注册
+  let findResult = await User.find({email:_body.email});
+  if(findResult.length == 0) {  // 没有查询到，即当前用户未注册
+    ctx.status = 400;
+    ctx.body = {msg:'该用户不存在'};
+  }else {  // 查询到，验证密码
+    let result = bcrypt.compareSync(_body.password, findResult[0].password);
+    if(result) {
+      ctx.status = 200;
+      ctx.body = {msg:'success'};
+    }else {
+      ctx.status = 400;
+      ctx.body = {msg:'密码错误'};
+    }
   }
 });
 
