@@ -1,10 +1,9 @@
 const Router = require('koa-router');
 const router = new Router();
-const bcrypt = require('bcryptjs');   // 对用户输入的密码进行加密
 const gravatar = require('gravatar');
 
-// 引入User
-const User = require('../../model/Users');
+const tools = require('../../config/tools');
+const User = require('../../model/Users');  // 引入User
 
 /**
  * @route GET api/users/test
@@ -40,18 +39,9 @@ router.post('/register', async ctx => {
       name: _body.name,
       email: _body.email,
       avatar:avatar,
-      password: _body.password
+      password:tools.enbcrypt( _body.password)
     });
     // console.log(newUser);
-
-    // 对密码进行加密处理
-    bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(newUser.password, salt, (err, hash) => {
-        // console.log(hash);
-        if (err) throw err;
-        newUser.password = hash;
-      });
-    });
 
     // 存储到数据库
     await newUser.save()
