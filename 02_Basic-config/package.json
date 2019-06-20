@@ -1,0 +1,18 @@
+{
+  "name": "02_basic-config",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "nodemon": "nodemon app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koa": "^2.7.0",
+    "koa-router": "^7.4.0",
+    "mongoose": "^5.6.0",
+    "nodemon": "^1.19.1"
+  }
+}
