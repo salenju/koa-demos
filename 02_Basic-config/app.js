@@ -1,16 +1,23 @@
 const koa = require('koa');
 const Router = require('koa-router');
 const mongoose = require('mongoose');
-
-const db = require('./config/keys').mongoURI;   // 引入db
-const users = require('./routes/api/users');  // 引入users.js
+const bodyParser = require('koa-bodyparser');
 
 // 实例化
 const app = new koa();
 const router = new Router();
 
+// 引入db
+const db = require('./config/keys').mongoURI;
+
+// 引入users.js
+const users = require('./routes/api/users');
+
+app.use(bodyParser());  //  此处需放在配置路由之前，否则会有异常
+
 // 配置路由
-app.use(router.routes()).use(router.allowedMethods());
+app.use(router.routes())
+  .use(router.allowedMethods());
 
 // 配置路由地址
 /**
@@ -19,7 +26,7 @@ app.use(router.routes()).use(router.allowedMethods());
  * eg:http://localhost:5000/api/users/test
  * 
  */
-router.use('/api/users',users);
+router.use('/api/users', users);
 
 // 连接数据库
 mongoose
