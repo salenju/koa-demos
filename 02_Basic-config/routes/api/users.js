@@ -9,6 +9,7 @@ const tools = require('../../config/tools');
 const User = require('../../model/Users');  // 引入User
 const keys = require('../../config/keys');
 const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 
 /**
  * @route GET api/users/test
@@ -78,6 +79,15 @@ router.post('/register', async ctx => {
  */
 router.post('/login', async ctx => {
   const _body = ctx.request.body;
+
+  // 检测用户输入信息是否合法
+  const { errors, isValid } = validateLoginInput(ctx.request.body);
+  if (!isValid) {
+    ctx.status = 400;
+    ctx.body = errors;
+    return;
+  }
+
   // 查询当前登录用户是否已注册
   let findResult = await User.find({ email: _body.email });
   const user = findResult[0];
