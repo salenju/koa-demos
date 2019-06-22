@@ -2,6 +2,7 @@ const koa = require('koa');
 const Router = require('koa-router');
 const mongoose = require('mongoose');
 const bodyParser = require('koa-bodyparser');
+const passport = require('koa-passport');   // 验证token
 
 // 实例化
 const app = new koa();
@@ -14,6 +15,13 @@ const db = require('./config/keys').mongoURI;
 const users = require('./routes/api/users');
 
 app.use(bodyParser());  //  此处需放在配置路由之前，否则会有异常
+
+// 配置passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// 将passport回调到config文件中的 passport.js
+require('./config/passport')(passport);
 
 // 配置路由
 app.use(router.routes())

@@ -3,10 +3,11 @@ const router = new Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');  // 生成token的插件
+const passport = require('koa-passport');
 
 const tools = require('../../config/tools');
 const User = require('../../model/Users');  // 引入User
-const Keys = require('../../config/keys');
+const keys = require('../../config/keys');
 
 /**
  * @route GET api/users/test
@@ -82,7 +83,7 @@ router.post('/login', async ctx => {
     if (result) {
       // 返回token
       const payload = { id: user.id, name: user.name, avatar: user.avatar };
-      const token = jwt.sign(payload, Keys.secretOrKey, { expiresIn: 3600 });
+      const token = jwt.sign(payload, keys.secretOrKey, { expiresIn: 3600 });
 
       ctx.status = 200;
       ctx.body = { success: true, token: 'Bearer ' + token };
@@ -98,5 +99,17 @@ router.post('/login', async ctx => {
  * @desc  用户信息接口地址，返回用户信息
  * @access 接口是私密的
  */
+// router.get('/current', '验证token', function)
+router.get('/current', passport.authenticate('jwt', { session: false }), async ctx => {
+  const { id, name, avatar ,email} = ctx.state.user;
+  ctx.body = {
+    id: id,
+    name: name,
+    avatar: avatar,
+    email:email
+  }
+
+});
+
 
 module.exports = router.routes();

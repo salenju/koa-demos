@@ -18,5 +18,8 @@
     "koa-router": "^7.4.0",
     "mongoose": "^5.6.0",
     "nodemon": "^1.19.1"
+  },
+  "devDependencies": {
+    "passport-jwt": "^4.0.0"
   }
 }
