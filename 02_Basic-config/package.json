@@ -20,6 +20,7 @@
     "nodemon": "^1.19.1"
   },
   "devDependencies": {
-    "passport-jwt": "^4.0.0"
+    "passport-jwt": "^4.0.0",
+    "validator": "^11.0.0"
   }
 }

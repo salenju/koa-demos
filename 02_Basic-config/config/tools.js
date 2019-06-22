@@ -14,6 +14,13 @@ const tools = {
     return result
   },
 
+  isEmpty: (data) => {
+    let result = data === '' || data === undefined || data === null ||
+      (typeof data === 'object' && Object.keys(data).length === 0) ||
+      (typeof data === 'string' && data.trim().length === 0);
+    return result;
+  },
+
 };
 
 module.exports = tools;

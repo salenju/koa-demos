@@ -8,6 +8,7 @@ const passport = require('koa-passport');
 const tools = require('../../config/tools');
 const User = require('../../model/Users');  // 引入User
 const keys = require('../../config/keys');
+const validateRegisterInput = require('../../validation/register');
 
 /**
  * @route GET api/users/test
@@ -27,6 +28,15 @@ router.get('/test', async ctx => {
 router.post('/register', async ctx => {
   // 存储到数据库
   const _body = ctx.request.body;
+
+  // 验证用户输入的信息是否符合合法
+  const { errors, isValid } = validateRegisterInput(ctx.request.body);
+  if (!isValid) {
+    ctx.status = 400;
+    ctx.body = errors;
+    return;
+  }
+
   const findResult = await User.find({ email: _body.email });
 
   //  检测当前用户是否已注册
@@ -101,12 +111,12 @@ router.post('/login', async ctx => {
  */
 // router.get('/current', '验证token', function)
 router.get('/current', passport.authenticate('jwt', { session: false }), async ctx => {
-  const { id, name, avatar ,email} = ctx.state.user;
+  const { id, name, avatar, email } = ctx.state.user;
   ctx.body = {
     id: id,
     name: name,
     avatar: avatar,
-    email:email
+    email: email
   }
 
 });
