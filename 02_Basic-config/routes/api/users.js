@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');  // 生成token的插件
 const passport = require('koa-passport');
 
 const tools = require('../../config/tools');
-const User = require('../../model/Users');  // 引入User
+const User = require('../../model/Users');  // 引入User模板实例
 const keys = require('../../config/keys');
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');

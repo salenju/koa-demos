@@ -11,8 +11,9 @@ const router = new Router();
 // 引入db
 const db = require('./config/keys').mongoURI;
 
-// 引入users.js
+// 引入users.js & profile.js
 const users = require('./routes/api/users');
+const profile = require('./routes/api/profile');
 
 app.use(bodyParser());  //  此处需放在配置路由之前，否则会有异常
 
@@ -35,6 +36,7 @@ app.use(router.routes())
  * 
  */
 router.use('/api/users', users);
+router.use('/api/profile', profile);
 
 // 连接数据库
 mongoose
