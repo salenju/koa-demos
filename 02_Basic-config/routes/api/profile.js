@@ -3,6 +3,7 @@ const router = new Router();
 const passport = require('koa-passport');
 
 const Profile = require('../../model/Profile');
+const validateProfileInput = require('../../validation/profile');
 
 /**
  * @route GET api/profile/test
@@ -47,7 +48,6 @@ router.get('/', passport.authenticate('jwt', { session: false }), async ctx => {
 
 const mapAttribute = (itemArr, object) => {
   let tarResult = {}
-  console.log(Array.isArray(itemArr))
   if (Array.isArray(itemArr) && itemArr.length !== 0) {
     itemArr.map(item => {
       object[item]
@@ -59,7 +59,17 @@ const mapAttribute = (itemArr, object) => {
 }
 
 router.post('/', passport.authenticate('jwt', { session: false }), async ctx => {
+  const _body = ctx.request.body;
   const { id } = ctx.state.user;  // 可以从token中获得user的信息
+
+  // 检测用户输入信息是否合法
+  const { errors, isValid } = validateProfileInput(_body);
+  if (!isValid) {
+    ctx.status = 400;
+    ctx.body = errors;
+    return;
+  }
+
   const arr = ['handle', 'company', 'website', 'location', 'status', 'skills', 'bio', 'githubusername'];
   let profileFields = {};
 
@@ -67,7 +77,7 @@ router.post('/', passport.authenticate('jwt', { session: false }), async ctx => 
     profileFields.user = id;
   }
 
-  Object.assign(profileFields, mapAttribute(arr, ctx.request.body));
+  Object.assign(profileFields, mapAttribute(arr, _body));
 
   const profile = await Profile.find({ user: id });
 
@@ -90,7 +100,5 @@ router.post('/', passport.authenticate('jwt', { session: false }), async ctx => 
       })
   }
 });
-
-
 
 module.exports = router.routes();

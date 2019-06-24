@@ -81,7 +81,7 @@ router.post('/login', async ctx => {
   const _body = ctx.request.body;
 
   // 检测用户输入信息是否合法
-  const { errors, isValid } = validateLoginInput(ctx.request.body);
+  const { errors, isValid } = validateLoginInput(_body);
   if (!isValid) {
     ctx.status = 400;
     ctx.body = errors;
