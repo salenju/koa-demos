@@ -71,12 +71,15 @@ router.post('/', passport.authenticate('jwt', { session: false }), async ctx => 
   }
 
   const arr = ['handle', 'company', 'website', 'location', 'status', 'skills', 'bio', 'githubusername'];
+  const arrSocial = ['wechat', 'QQ', 'tengxunkt', 'wangyikt'];
+
   let profileFields = {};
 
   if (id) {
     profileFields.user = id;
   }
 
+  profileFields.social = mapAttribute(arrSocial, _body);
   Object.assign(profileFields, mapAttribute(arr, _body));
 
   const profile = await Profile.find({ user: id });
@@ -98,6 +101,65 @@ router.post('/', passport.authenticate('jwt', { session: false }), async ctx => 
         ctx.status = 200;
         ctx.body = profile;
       })
+  }
+});
+
+/**
+ * @route GET api/profile/handle?handle=test
+ * @desc  通过handle获取用户信息接口地址
+ * @access 接口是公开的
+ */
+router.get('/handle', async ctx => {
+  const { handle } = ctx.query;
+  let errors = {};
+
+  let profile = await Profile.find({handle:handle}).populate('user',['name','avatar']);
+  if(profile.length === 0) {
+    errors.noProfile = '未找到用户信息';
+    ctx.status = 404;
+    ctx.body = errors;
+  }else {
+    ctx.status = 200;
+    ctx.body = profile[0];
+  }
+});
+
+/**
+ * @route GET api/profile/user_id?user_id=test
+ * @desc  通过user_id获取用户信息接口地址
+ * @access 接口是公开的
+ */
+router.get('/user_id', async ctx => {
+  const { user_id } = ctx.query;
+  let errors = {};
+
+  let profile = await Profile.find({user:user_id}).populate('user',['name','avatar']);
+  if(profile.length === 0) {
+    errors.noProfile = '未找到用户信息';
+    ctx.status = 404;
+    ctx.body = errors;
+  }else {
+    ctx.status = 200;
+    ctx.body = profile[0];
+  }
+});
+
+/**
+ * @route GET api/profile/all
+ * @desc  获取所有用户信息接口地址
+ * @access 接口是公开的
+ */
+router.get('/all', async ctx => {
+  let errors = {};
+
+  let profiles = await Profile.find({}).populate('user',['name','avatar']);
+  if(profiles.length === 0) {
+    errors.noProfile = '没有找到任何用户信息';
+    ctx.status = 404;
+    ctx.body = errors;
+  }else {
+    ctx.status = 200;
+    ctx.body = profiles;
   }
 });
 
