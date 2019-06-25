@@ -2,9 +2,14 @@ const Router = require('koa-router');
 const router = new Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');  // 生成token的插件
+const passport = require('koa-passport');
 
 const tools = require('../../config/tools');
-const User = require('../../model/Users');  // 引入User
+const User = require('../../model/Users');  // 引入User模板实例
+const keys = require('../../config/keys');
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 
 /**
  * @route GET api/users/test
@@ -24,6 +29,15 @@ router.get('/test', async ctx => {
 router.post('/register', async ctx => {
   // 存储到数据库
   const _body = ctx.request.body;
+
+  // 验证用户输入的信息是否符合合法
+  const { errors, isValid } = validateRegisterInput(ctx.request.body);
+  if (!isValid) {
+    ctx.status = 400;
+    ctx.body = errors;
+    return;
+  }
+
   const findResult = await User.find({ email: _body.email });
 
   //  检测当前用户是否已注册
@@ -39,8 +53,8 @@ router.post('/register', async ctx => {
     const newUser = new User({
       name: _body.name,
       email: _body.email,
-      avatar:avatar,
-      password:tools.enbcrypt( _body.password)
+      avatar: avatar,
+      password: tools.enbcrypt(_body.password)
     });
     // console.log(newUser);
 
@@ -63,23 +77,59 @@ router.post('/register', async ctx => {
  * @desc  登录接口地址，返回token
  * @access 接口是公开的
  */
-router.post('/login',async ctx => {
+router.post('/login', async ctx => {
   const _body = ctx.request.body;
-  // 查询当前登录用户是否已注册
-  let findResult = await User.find({email:_body.email});
-  if(findResult.length == 0) {  // 没有查询到，即当前用户未注册
+
+  // 检测用户输入信息是否合法
+  const { errors, isValid } = validateLoginInput(_body);
+  if (!isValid) {
     ctx.status = 400;
-    ctx.body = {msg:'该用户不存在'};
-  }else {  // 查询到，验证密码
-    let result = bcrypt.compareSync(_body.password, findResult[0].password);
-    if(result) {
+    ctx.body = errors;
+    return;
+  }
+
+  // 查询当前登录用户是否已注册
+  let findResult = await User.find({ email: _body.email });
+  const user = findResult[0];
+  const password = _body.password
+
+  if (findResult.length == 0) {  // 没有查询到，即当前用户未注册
+    ctx.status = 400;
+    ctx.body = { msg: '该用户不存在' };
+  } else {  // 查询到，验证密码
+    let result = bcrypt.compareSync(password, user.password);
+
+    // 验证通过
+    if (result) {
+      // 返回token
+      const payload = { id: user.id, name: user.name, avatar: user.avatar };
+      const token = jwt.sign(payload, keys.secretOrKey, { expiresIn: 3600 });
+
       ctx.status = 200;
-      ctx.body = {msg:'success'};
-    }else {
+      ctx.body = { success: true, token: 'Bearer ' + token };
+    } else {
       ctx.status = 400;
-      ctx.body = {msg:'密码错误'};
+      ctx.body = { msg: '密码错误' };
     }
   }
 });
+
+/**
+ * @route GET api/users/current
+ * @desc  用户信息接口地址，返回用户信息
+ * @access 接口是私密的
+ */
+// router.get('/current', '验证token', function)
+router.get('/current', passport.authenticate('jwt', { session: false }), async ctx => {
+  const { id, name, avatar, email } = ctx.state.user;
+  ctx.body = {
+    id: id,
+    name: name,
+    avatar: avatar,
+    email: email
+  }
+
+});
+
 
 module.exports = router.routes();
