@@ -39,9 +39,11 @@ router.get('/', passport.authenticate('jwt', { session: false }), async ctx => {
   const { id } = ctx.state.user;  // 可以从token中获得user的信息
 
   /**
-   * Profile.find({user:id}).populate('user',['name','avatar'])
+   *  Profile.find({user:id}).populate('user',['name','avatar'])
    *  Profile.find({user:id})——在Profile表中通过user:id来查找对应的用户
-   *  populate('user',['name','avatar'])——关联user表，查找name,avatar字段
+   *  populate('user',['name','avatar'])——关联users表，查找name,avatar字段,并join到查询到的user字段中
+   * 
+   *  《Mongoose 之 Population 使用》 https://segmentfault.com/a/1190000002727265
    */
   const profile = await Profile.find({ user: id }).populate('user', ['name', 'avatar']);
 
