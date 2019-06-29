@@ -258,7 +258,7 @@ router.post('/education', passport.authenticate('jwt', { session: false }), asyn
     // update
     const profileUpdate = await Profile.update(
       { user: id },
-      { $push: { experience: profileFields.education } },
+      { $push: { education: profileFields.education } },
       { $sort: 1 }
     );
 
