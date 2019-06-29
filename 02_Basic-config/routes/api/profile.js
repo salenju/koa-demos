@@ -3,6 +3,7 @@ const router = new Router();
 const passport = require('koa-passport');
 
 const Profile = require('../../model/Profile');
+const User = require('../../model/Users');
 const validateProfileInput = require('../../validation/profile');
 const validateExperienceInput = require('../../validation/experience');
 const validateEducationInput = require('../../validation/education');
@@ -226,6 +227,41 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), asy
 });
 
 /**
+ * @route DELETE api/profile/experience?exp_id=shkdfh
+ * @desc  删除experience接口地址
+ * @access 接口是私密的
+ */
+
+router.delete('/experience', passport.authenticate('jwt', { session: false }), async ctx => {
+  const { exp_id } = ctx.query;
+  const { id } = ctx.state.user;  // 可以从token中获得user的信息
+
+  //  找到user_id对应的账户信息里的experience
+  let profile = await Profile.find({ user: id });
+  let _experience = profile[0] !== undefined ? profile[0].experience : [];
+
+  // 判断对experience的长度
+  if (_experience.length !== 0) {
+    // 通过遍历experience 删除exp_id对应的信息
+    profile[0].experience = _experience.filter(item => item.id === exp_id);
+
+    // 更新删除后的experience到数据库
+    let profileUpdate = await Profile.findOneAndUpdate(
+      { user: id },
+      { $set: profile[0] },
+      { new: true }
+    );
+    if (profileUpdate.ok === 1) {
+      ctx.status = 200;
+      ctx.body = profileUpdate;
+    }
+  } else {
+    ctx.status = 404;
+    ctx.body = { msg: '没有找到对应的数据' };
+  }
+});
+
+/**
  * @route POST api/profile/education
  * @desc  添加education接口地址
  * @access 接口是私密的
@@ -278,6 +314,65 @@ router.post('/education', passport.authenticate('jwt', { session: false }), asyn
     error.noProfile = '没有该用户的信息';
     ctx.status = 404;
     ctx.body = error;
+  }
+});
+
+/**
+ * @route DELETE api/profile/education?edu_id=snkdvlds
+ * @desc  删除education接口地址
+ * @access 接口是私密的
+ */
+
+router.delete('/education', passport.authenticate('jwt', { session: false }), async ctx => {
+  const { edu_id } = ctx.query;
+  const { id } = ctx.state.user;  // 可以从token中获得user的信息
+
+  //  找到user_id对应的账户信息里的education
+  let profile = await Profile.find({ user: id });
+  let _education = profile[0] !== undefined ? profile[0].education : [];
+
+  // 判断对experience的长度
+  if (_education.length !== 0) {
+    // 通过遍历experience 删除exp_id对应的信息
+    profile[0].education = _education.filter(item => item.id === edu_id);
+
+    // 更新删除后的experience到数据库
+    let profileUpdate = await Profile.findOneAndUpdate(
+      { user: id },
+      { $set: profile[0] },
+      { new: true }
+    );
+    if (profileUpdate.ok === 1) {
+      ctx.status = 200;
+      ctx.body = profileUpdate;
+    }
+  } else {
+    ctx.status = 404;
+    ctx.body = { msg: '没有找到对应的数据' };
+  }
+});
+
+/**
+ * @route DELETE api/profile
+ * @desc  删除用户信息接口地址
+ * @access 接口是私密的
+ */
+
+router.delete('/', passport.authenticate('jwt', { session: false }), async ctx => {
+  const { id } = ctx.state.user;  // 可以从token中获得user的信息
+
+  // 在Profile表中删除userId对应的信息
+  let profile = await Profile.deleteOne({ user: id });
+  if (profile.ok === 1) {
+    // 在User表中删除userId对应的信息
+    let user = await User.deleteOne({ _id: id });
+    if (user.ok === 1) {
+      ctx.status = 200;
+      ctx.body = { success: true };
+    }
+  } else {
+    ctx.status = 404;
+    ctx.body = { error: 'profile不存在' };
   }
 });
 
