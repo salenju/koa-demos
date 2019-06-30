@@ -116,6 +116,69 @@ router.delete('/', passport.authenticate('jwt', { session: false }), async ctx =
           ctx.body = { error: '未能删除成功' };
         })
     }
+  } else {
+    ctx.status = 400;
+    ctx.body = { mag: '未找到当前用户信息' };
+  }
+});
+
+/**
+ * @route POST api/post/like_unlike?post_id=ashsdamsndfh
+ * @desc  点赞/取消点赞接口地址
+ * @access 接口是私有的
+ */
+
+router.post('/like_unlike', passport.authenticate('jwt', { session: false }), async ctx => {
+  const { post_id } = ctx.query;
+  const { id } = ctx.state.user;  // 可以从token中获得user的信息
+
+  // 当前用户是否拥有个人信息(只有拥有个人信息的用户才有评论的权限)
+  let profile = await Profile.find({ user: id });
+  if (profile.length !== 0) {
+    //  查找当前post_id对应的留言信息
+    let post = await Post.findById(post_id);
+    // 当前post_id对应的留言信息中likes是否包含当前userId
+    let tarIndex = post.likes.filter(item => item.user === id);
+
+    //  当前userId是否已经点赞过
+    if (tarIndex !== -1) {
+      // 执行取消点赞操作
+      post.likes = post.likes.splice(tarIndex, 1);
+      let postUpdate = await Post.findOneAndUpdate(
+        { _id: post_id },
+        { $set: post },
+        { new: true }
+      );
+
+      if (postUpdate.ok === 1) {
+        ctx.status = 200;
+        ctx.body = postUpdate;
+      } else {
+        ctx.status = 500;
+        ctx.body = { error: '取消点赞失败' };
+      }
+    } else {
+      // 执行点赞操作
+      post.likes.push({
+        user: id
+      });
+      let postUpdate = await Post.findOneAndUpdate(
+        { _id: post_id },
+        { $set: post },
+        { new: true }
+      );
+      if (postUpdate.ok === 1) {
+        ctx.status = 200;
+        ctx.body = postUpdate;
+      } else {
+        ctx.status = 500;
+        ctx.body = { error: '点赞失败' };
+      }
+    }
+
+  } else {
+    ctx.status = 400;
+    ctx.body = { mag: '未找到当前用户信息' };
   }
 });
 
