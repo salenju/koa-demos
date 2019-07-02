@@ -1,9 +1,9 @@
 const Router = require('koa-router');
 const router = new Router();
 const gravatar = require('gravatar');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');  // 生成token的插件
-const passport = require('koa-passport');
+const bcrypt = require('bcryptjs');   // 加密密码
+const jwt = require('jsonwebtoken');  // 生成token
+const passport = require('koa-passport');   // 权限认证
 
 const tools = require('../../config/tools');
 const User = require('../../model/Users');  // 引入User模板实例
