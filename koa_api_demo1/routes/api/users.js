@@ -7,7 +7,7 @@ const userModel = require('../../models/userModel')
 
 /**
  * @route GET api/users/test
- * @desc 测试接口地址
+ * @desc 测试接口
  * @access 公开接口
  */
 router.get('/test', async ctx => {
@@ -16,5 +16,16 @@ router.get('/test', async ctx => {
     msg: 'users working...'
   };
 });
+
+
+/**
+ * @route POST api/users/register
+ * @desc 用户注册接口
+ * @access 公开接口
+ */
+router.post('/register',async ctx => {
+  console.log(ctx.request.body);
+})
+
 
 module.exports = router.routes();

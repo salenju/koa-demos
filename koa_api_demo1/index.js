@@ -2,6 +2,7 @@ const Koa = require('koa');
 const Json = require('koa-json');
 const Router = require('koa-router');
 const mongoose = require('mongoose');
+const bodyParser = require('koa-bodyparser');
 
 // 实例化koa
 const app = new Koa();
@@ -9,6 +10,9 @@ const router = new Router();
 
 // json pretty
 app.use(Json());
+
+// 解析请求体
+app.use(bodyParser());
 
 // 配置路由模块
 app.use(router.routes())
@@ -31,6 +35,7 @@ mongoose.connect(db, { useNewUrlParser: true })
   .then(() => console.log('Mongodb connected...'))
   .catch(err => console.log(err))
 
-const port = process.env.PORT || 5000;
+// const port = process.env.PORT || 5000;
+const port = 5000;
 
 app.listen(port, () => console.log('Server Started...'));
