@@ -1,8 +1,7 @@
 const Koa = require('koa');
 const Json = require('koa-json');
 const Router = require('koa-router');
-const render = require('koa-ejs');
-const path = require('path');
+const mongoose = require('mongoose');
 
 // 实例化koa
 const app = new Koa();
@@ -15,22 +14,22 @@ app.use(Json());
 app.use(router.routes())
   .use(router.allowedMethods())
 
-// 配置模板引擎
-render(app, {
-  root: path.join(__dirname, 'views'),
-  layout: 'layout',
-  viewExt: 'html',
-  cache: false,
-  debug: false,
-});
+// 配置路由地址
+const users = require('./routes/api/users');
 
-// 配置路由跳转
-router.get('/add', ctx => (ctx.body = 'Hello Router!'))
-router.get('/', async ctx => {
-  await ctx.render('index', {
-    title: 'I love China'
-  })
-});
+/**
+ * http://localhost:5000/api/users/
+ * 只要是包含上面的url就会跳转到users.js文件中进行路由的处理
+ * eg:http://localhost:5000/api/users/test
+ * 
+ */
+router.use('api/users', users);
+
+// 连接DB
+const db = require('./config/keys').mogoURI;  // 引入DB
+mongoose.connect(db, { useNewUrlParser: true })
+  .then(() => console.log('Mongodb connected...'))
+  .catch(err => console.log(err))
 
 const port = process.env.PORT || 5000;
 
