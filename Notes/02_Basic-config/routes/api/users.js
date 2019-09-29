@@ -73,7 +73,7 @@ router.post('/register', async ctx => {
 });
 
 /**
- * @route POST api/users/register
+ * @route POST api/users/login
  * @desc  登录接口地址，返回token
  * @access 接口是公开的
  */

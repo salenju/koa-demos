@@ -27,7 +27,7 @@ const users = require('./routes/api/users');
  * eg:http://localhost:5000/api/users/test
  * 
  */
-router.use('api/users', users);
+router.use('/api/users', users);
 
 // 连接DB
 const db = require('./config/keys').mogoURI;  // 引入DB

@@ -8,7 +8,7 @@ const bodyParser = require('koa-bodyparser');
 const app = new Koa();
 const router = new KoaRouter();
 
-app.use(json());  // 格式换json数据
+app.use(json());  // 格式化json数据
 app.use(bodyParser());
 app.use(router.routes()).use(router.allowedMethods());  // 配置路由模块
 
