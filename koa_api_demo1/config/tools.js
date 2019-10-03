@@ -12,7 +12,18 @@ tools = {
   comparePwd: (inputPwd, dbPwd) => {
     let compareResult = bcrypt.compareSync(inputPwd, dbPwd);
     return compareResult;
-  }
+  },
+
+  // 判断data是都为空
+  isEmpty: (data) => {
+    let result = data === '' ||
+      data === null ||
+      data === undefined ||
+      (Array.isArray(data) && data.length === 0) ||
+      (typeof data === 'object' && Object.keys(data).length === 0)
+
+    return result;
+  },
 }
 
 module.exports = tools;

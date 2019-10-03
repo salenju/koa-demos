@@ -1,5 +1,10 @@
 const Router = require('koa-router');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const keys = require('../../config/keys');
+const passport = require('koa-passport');
+const validateRegisterInput = require('../../validation/register');
+const validateLoginInput = require('../../validation/login');
 
 const router = new Router();
 
@@ -28,6 +33,18 @@ router.get('/test', async ctx => {
  */
 router.post('/register', async ctx => {
   const _body = ctx.request.body;
+
+  // 验证注册信息
+  const { errors, isValid } = validateRegisterInput(ctx.request.body)
+  if (!isValid) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'F',
+      errMsg: errors,
+      data: ''
+    }
+    return;
+  }
 
   //  存储数据到数据库
   const findResult = await userModel.find({ email: _body.email });
@@ -67,6 +84,18 @@ router.post('/register', async ctx => {
 router.post('/login', async ctx => {
   const _body = ctx.request.body;
 
+  // 验证登录
+  const { errors, isValid } = validateLoginInput(ctx.request.body);
+  if (!isValid) {
+    ctx.status = 400;
+    ctx.body = {
+      status: 'F',
+      errMsg: errors,
+      data: ''
+    };
+    return;
+  }
+
   // 通过输入的email查找用户 
   let findResult = await userModel.find({ email: _body.email });
   let findUserInfo = findResult[0];
@@ -76,11 +105,15 @@ router.post('/login', async ctx => {
     // 比较输入密码和DB中的密码是否一致
     let pwdSame = await bcrypt.compareSync(_body.password, findUserInfo.password);
     if (pwdSame) {
+      // 生成token
+      let payload = { id: findUserInfo.id, name: findUserInfo.name, avatar: findUserInfo.avatar };
+      let token = jwt.sign(payload, keys.secretOrKey, { expiresIn: 3600 });
+
       ctx.status = 200;
       ctx.body = {
         status: 'S',
         errMsg: '',
-        data: '登录成功！'
+        data: `Bearer ${token}`
       };
     } else {
       ctx.status = 400;
@@ -97,6 +130,27 @@ router.post('/login', async ctx => {
       errMsg: '该用户不存在',
       data: ''
     };
+  }
+});
+
+/**
+ * @route POST api/users/current
+ * @desc 用户信息接口，返回用户信息
+ * @access 私密接口
+ */
+router.get('/current', passport.authenticate('jwt', { session: false }), async ctx => {
+  // console.log('===>ctx:',ctx.state.user)
+
+  const { id, name, email } = ctx.state.user;
+  ctx.status = 200;
+  ctx.body = {
+    status: 'S',
+    errMsg: '',
+    data: {
+      id: id,
+      name: name,
+      email: email
+    }
   }
 });
 

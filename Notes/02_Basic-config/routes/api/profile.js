@@ -46,7 +46,7 @@ router.get('/', passport.authenticate('jwt', { session: false }), async ctx => {
    * 
    *  《Mongoose 之 Population 使用》 https://segmentfault.com/a/1190000002727265
    */
-  const profile = await Profile.find({ user: id }).populate('user', ['name', 'avatar']);
+  const profile = await Profile.find({ user: id }).populate('users', ['name', 'avatar']);
 
   if (profile.length > 0) {
     ctx.status = 200;
@@ -119,7 +119,7 @@ router.get('/handle', async ctx => {
   const { handle } = ctx.query;
   let errors = {};
 
-  let profile = await Profile.find({ handle: handle }).populate('user', ['name', 'avatar']);
+  let profile = await Profile.find({ handle: handle }).populate('users', ['name', 'avatar']);
   if (profile.length === 0) {
     errors.noProfile = '未找到用户信息';
     ctx.status = 404;
@@ -139,7 +139,7 @@ router.get('/user_id', async ctx => {
   const { user_id } = ctx.query;
   let errors = {};
 
-  let profile = await Profile.find({ user: user_id }).populate('user', ['name', 'avatar']);
+  let profile = await Profile.find({ user: user_id }).populate('users', ['name', 'avatar']);
   if (profile.length === 0) {
     errors.noProfile = '未找到用户信息';
     ctx.status = 404;
@@ -158,7 +158,7 @@ router.get('/user_id', async ctx => {
 router.get('/all', async ctx => {
   let errors = {};
 
-  let profiles = await Profile.find({}).populate('user', ['name', 'avatar']);
+  let profiles = await Profile.find({}).populate('users', ['name', 'avatar']);
   if (profiles.length === 0) {
     errors.noProfile = '没有找到任何用户信息';
     ctx.status = 404;
@@ -213,7 +213,7 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), asy
      */
 
     if (profileUpdate.ok === 1) {
-      let profile = await Profile.find({ user: id }).populate('user', ['name', 'avatar']);
+      let profile = await Profile.find({ user: id }).populate('users', ['name', 'avatar']);
       if (profile.length !== 0) {
         ctx.status = 200;
         ctx.body = profile;
@@ -304,7 +304,7 @@ router.post('/education', passport.authenticate('jwt', { session: false }), asyn
      */
 
     if (profileUpdate.ok === 1) {
-      let profile = await Profile.find({ user: id }).populate('user', ['name', 'avatar']);
+      let profile = await Profile.find({ user: id }).populate('users', ['name', 'avatar']);
       if (profile.length !== 0) {
         ctx.status = 200;
         ctx.body = profile;
