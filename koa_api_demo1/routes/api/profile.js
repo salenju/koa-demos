@@ -237,7 +237,45 @@ router.get('/all', async ctx => {
  * @desc   添加experience
  * @access 私密接口
  */
-router.post('/experience');
+router.post('/experience', passport.authenticate('jwt', { session: false }), async ctx => {
+  const _body = ctx.request.body;
+  const { id } = ctx.state.user;
+  let experienceArr = ['title', 'current', 'company', 'location', 'from', 'to', 'description'];
+
+  // 检测输入是否合法
+
+  // 查找用户是否存在
+  const profile = await profileModel.find({ user: id });
+  if (profile.length > 0) {
+    let nexExp = mapAttribute(experienceArr, _body);
+    let _experience = [];
+    _experience.unshift(nexExp);
+    const profileUpdate = await profileModel.update(
+      { uesr: id },
+      { $push: { experience: _experience } },
+      { $sort: 1 }
+    );
+
+    if (profileUpdate.ok === 1) {
+      let profile = await profileModel.find({ user: id }).populate('user', ['name', 'avatar']);
+      if (profile.length !== 0) {
+        ctx.status = 200;
+        ctx.body = {
+          status: 'S',
+          errMsg: '',
+          data: profile
+        }
+      }
+    }
+  } else {
+    ctx.status = 404;
+    ctx.body = {
+      status: 'F',
+      errMsg: '没有该用户的信息',
+      data: ''
+    }
+  }
+});
 
 /**
  * @route DELETE api/profile/experience?exp_id=knsdh
