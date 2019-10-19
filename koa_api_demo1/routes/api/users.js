@@ -65,12 +65,12 @@ router.post('/register', async ctx => {
     await newUser.save()
       .then(res => {
         ctx.status = 200;
-        // ctx.body = {
-        //   status: 'S',
-        //   errMsg: '',
-        //   data: ''
-        // }
-        ctx.body = res  // For test
+        ctx.body = {
+          status: 'S',
+          errMsg: '',
+          data: res
+        }
+        // ctx.body = res  // For test
       })
       .catch(err => console.log(err))
   }
@@ -119,7 +119,7 @@ router.post('/login', async ctx => {
       ctx.status = 400;
       ctx.body = {
         status: 'F',
-        errMsg: '密码错误',
+        errMsg: {password:'用户名或密码错误'},
         data: ''
       };
     }
@@ -127,7 +127,7 @@ router.post('/login', async ctx => {
     ctx.status = 404;
     ctx.body = {
       status: 'F',
-      errMsg: '该用户不存在',
+      errMsg: {email:'该用户不存在'},
       data: ''
     };
   }

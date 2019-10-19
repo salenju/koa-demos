@@ -4,6 +4,7 @@ const Router = require('koa-router');
 const mongoose = require('mongoose');
 const bodyParser = require('koa-bodyparser');
 const passport = require('koa-passport');
+const cors = require('koa2-cors');
 
 // 实例化koa
 const app = new Koa();
@@ -15,6 +16,9 @@ app.use(Json());
 // 解析请求体
 app.use(bodyParser());   //  此处需放在配置路由之前，否则会有异常
 
+// 使用中间件实现允许跨域
+// app.use(cors());   //  此处需放在配置路由之前，否则会有异常
+
 // 配置路由模块
 app.use(router.routes())
   .use(router.allowedMethods())
@@ -22,7 +26,7 @@ app.use(router.routes())
 // 配置passport
 app.use(passport.initialize())
   .use(passport.session())
-  
+
 // 将passport回调到config文件中的 passport.js
 require('./config/passport')(passport);
 
@@ -44,6 +48,7 @@ const db = require('./config/keys').mogoURI;  // 引入DB
 mongoose.connect(db, { useNewUrlParser: true })
   .then(() => console.log('Mongodb connected...'))
   .catch(err => console.log(err))
+
 
 // const port = process.env.PORT || 5000;
 const port = 5000;
