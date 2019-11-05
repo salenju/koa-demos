@@ -243,7 +243,7 @@ router.delete('/experience', passport.authenticate('jwt', { session: false }), a
   // 判断对experience的长度
   if (_experience.length !== 0) {
     // 通过遍历experience 删除exp_id对应的信息
-    profile[0].experience = _experience.filter(item => item.id === exp_id);
+    profile[0].experience = _experience.filter(item => item.id !== exp_id);
 
     // 更新删除后的experience到数据库
     let profileUpdate = await Profile.findOneAndUpdate(

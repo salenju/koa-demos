@@ -17,7 +17,7 @@ app.use(Json());
 app.use(bodyParser());   //  此处需放在配置路由之前，否则会有异常
 
 // 使用中间件实现允许跨域
-// app.use(cors());   //  此处需放在配置路由之前，否则会有异常
+app.use(cors());   //  此处需放在配置路由之前，否则会有异常
 
 // 配置路由模块
 app.use(router.routes())

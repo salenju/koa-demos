@@ -50,7 +50,7 @@ router.get('/', passport.authenticate('jwt', { session: false }), async ctx => {
     ctx.body = {
       status: 'S',
       errMsg: '',
-      data: profile
+      data: profile[0]
     }
   } else {
     ctx.status = 404;
@@ -152,8 +152,8 @@ router.delete('/', passport.authenticate('jwt', { session: false }), async ctx =
 
 /* ============================================ 获取用户信息API Start============================================ */
 /**
- * @route GET api/profile/handle?handle=test
- * @desc  获取用户信息（handle）
+ * @route  GET api/profile/handle?handle=test
+ * @desc   获取用户信息（handle）
  * @access 公开接口
  */
 router.get('/handle', async ctx => {
@@ -179,7 +179,7 @@ router.get('/handle', async ctx => {
 });
 
 /**
- * @route GET api/profile/user_id?user_id=test
+ * @route  GET api/profile/user_id?user_id=test
  * @desc   获取用户信息（user_id）
  * @access 公开接口
  */
@@ -206,7 +206,7 @@ router.get('/user_id', async ctx => {
 });
 
 /**
- * @route GET api/profile/all
+ * @route  GET api/profile/all
  * @desc   获取所有用户信息
  * @access 公开接口
  */
@@ -232,8 +232,9 @@ router.get('/all', async ctx => {
 });
 /* ============================================ 获取用户信息API End============================================ */
 
+/* ============================================ experience & education API Start============================================ */
 /**
- * @route POST api/profile/experience
+ * @route   POST api/profile/experience
  * @desc   添加experience
  * @access 私密接口
  */
@@ -250,6 +251,8 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), asy
     let nexExp = mapAttribute(experienceArr, _body);
     let _experience = [];
     _experience.unshift(nexExp);
+
+    // 更新内容
     const profileUpdate = await profileModel.update(
       { uesr: id },
       { $push: { experience: _experience } },
@@ -278,24 +281,58 @@ router.post('/experience', passport.authenticate('jwt', { session: false }), asy
 });
 
 /**
- * @route DELETE api/profile/experience?exp_id=knsdh
+ * @route   DELETE api/profile/experience?exp_id=knsdh
  * @desc   删除experience
  * @access 私密接口
  */
-router.delete('/experience');
+router.delete('/experience', passport.authenticate('jwt', { session: fasle }), async ctx => {
+  const { exp_id } = ctx.query;
+  const { id } = ctx.state.user;
+
+  //  找到user_id对应的账户信息里的experience
+  let profile = await profileModel.find({ user: id });
+  let _experience = profile[0] !== undefined ? profile[0].experience : [];
+
+  // 判断experience是否为空
+  if (_experience.length !== 0) {
+    //  删除exp_id对应的experience信息
+    profile[0].experience = profile[0].experience.filter(item => item.id !== exp_id)
+
+    // update删除后的expericence信息
+    let profileUpdate = await profileModel.findOneAndUpdate(
+      { user: id },
+      { $set: profile[0] },
+      { new: true }
+    );
+    if (profileUpdate.ok === 1) {
+      ctx.status = 200;
+      ctx.body = profileUpdate;
+    }
+  } else {
+    ctx.status = 404;
+    ctx.body = {
+      status: 'F',
+      errMsg: '没有该用户的信息',
+      data: ''
+    }
+  }
+});
 
 /**
- * @route POST api/profile/education
+ * @route   POST api/profile/education
  * @desc   添加education
  * @access 私密接口
  */
+
 router.post('/education');
 
 /**
- * @route DELETE api/profile/education?edu_id = slhdkj
- * @desc  删除education
+ * @route   DELETE api/profile/education?edu_id = slhdkj
+ * @desc   删除education
  * @access 私密接口
  */
 router.delete('/education');
+
+/* ============================================ experience &education API End============================================ */
 
 module.exports = router.routes();
